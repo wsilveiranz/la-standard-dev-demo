@@ -86,4 +86,4 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az logicapp deployment --resource-group ${{ env.LA_RG }} --name ${{ env.LA_NAME }} --src-path  dev.azure.parameters.json --type static --target-path parameters.json
+            az functionapp deploy --resource-group ${{ env.LA_RG }} --name ${{ env.LA_NAME }} --src-path  dev.azure.parameters.json --type static --target-path parameters.json
