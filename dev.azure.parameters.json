@@ -1,6 +1,10 @@
 {
   "backendtable": {
     "type": "String",
-    "value": "backbasedemotbl"
+    "value": "ladevdemobackend"
+  },
+  "customerqueue": {
+    "type": "String",
+    "value": "la-standard-dev-demo"
   }
 }

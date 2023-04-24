@@ -105,7 +105,7 @@
                 "type": "ServiceProvider",
                 "inputs": {
                     "parameters": {
-                        "queueName": "backbase-demo-queue",
+                        "queueName": "@{parameters('customerqueue')}",
                         "isSessionsEnabled": false
                     },
                     "serviceProviderConfiguration": {

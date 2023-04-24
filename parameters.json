@@ -2,5 +2,9 @@
   "backendtable": {
     "type": "String",
     "value": "backbasedemotbl"
+  },
+  "customerqueue": {
+    "type": "String",
+    "value": "backbase-demo-queue"
   }
 }

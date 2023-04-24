@@ -9,7 +9,7 @@
                         "type": "ServiceProvider",
                         "inputs": {
                             "parameters": {
-                                "entityName": "backbase-demo-queue",
+                                "entityName": "@parameters('customerqueue')",
                                 "message": {
                                     "contentData": "@triggerBody()",
                                     "contentType": "application/json",
