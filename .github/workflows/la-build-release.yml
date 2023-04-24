@@ -79,7 +79,7 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az logicapp config appsettings set --name ${{ env.LA_NAME }} --resource-group ${{ env.LA_RG }} --settings "serviceBus_connectionString=${{ secrets.SB_CONN }} azureTables_connectionString=${{ secrets.STOR_CONN }}"
+            az logicapp config appsettings set --name ${{ env.LA_NAME }} --resource-group ${{ env.LA_RG }} --settings "serviceBus_connectionString=${{ secrets.SB_CONN }}" "azureTables_connectionString=${{ secrets.STOR_CONN }}"
       
       - name: Swap parameter files 
         id: params
