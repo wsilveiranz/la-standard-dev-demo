@@ -1,0 +1,121 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Scope": {
+                "type": "Scope",
+                "actions": {
+                    "For_each": {
+                        "type": "Foreach",
+                        "foreach": "@triggerBody()",
+                        "actions": {
+                            "Insert_or_Update_Entity": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "tableName": "@parameters('backendtable')",
+                                        "entity": {
+                                            "PartitionKey": "Customers",
+                                            "RowKey": "@{item()?['messageId']}",
+                                            "Name": "@body('Parse_Customer')?['customerName']",
+                                            "Email": "@body('Parse_Customer')?['customerEmail']",
+                                            "City": "@body('Parse_Customer')?['customerCity']"
+                                        }
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "azureTables",
+                                        "operationId": "upsertEntity",
+                                        "serviceProviderId": "/serviceProviders/azureTables"
+                                    }
+                                },
+                                "runAfter": {
+                                    "Parse_Customer": [
+                                        "Succeeded"
+                                    ]
+                                }
+                            },
+                            "Complete_the_message": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "messageId": "@item()?['messageId']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "serviceBus",
+                                        "operationId": "completeMessage",
+                                        "serviceProviderId": "/serviceProviders/serviceBus"
+                                    }
+                                },
+                                "runAfter": {
+                                    "Insert_or_Update_Entity": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            },
+                            "Abandon_the_message": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "messageId": "@item()?['messageId']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "serviceBus",
+                                        "operationId": "abandonMessage",
+                                        "serviceProviderId": "/serviceProviders/serviceBus"
+                                    }
+                                },
+                                "runAfter": {
+                                    "Insert_or_Update_Entity": [
+                                        "TIMEDOUT",
+                                        "SKIPPED",
+                                        "FAILED"
+                                    ]
+                                }
+                            },
+                            "Parse_Customer": {
+                                "type": "ParseJson",
+                                "inputs": {
+                                    "content": "@item()?['contentData']",
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "customerName": {
+                                                "type": "string"
+                                            },
+                                            "customerEmail": {
+                                                "type": "string"
+                                            },
+                                            "customerCity": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "runAfter": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_queue_(peek-lock)": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "queueName": "backbase-demo-queue",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "peekLockQueueMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                }
+            }
+        }
+    },
+    "kind": "Stateless"
+}
