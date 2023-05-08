@@ -113,7 +113,8 @@
                         "operationId": "peekLockQueueMessages",
                         "serviceProviderId": "/serviceProviders/serviceBus"
                     }
-                }
+                },
+                "splitOn": "@triggerOutputs()?['body']"
             }
         }
     },
