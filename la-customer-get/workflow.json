@@ -1,0 +1,71 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Scope": {
+                "type": "Scope",
+                "actions": {
+                    "Get_Entity": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "tableName": "@parameters('backendtable')",
+                                "partitionKey": "Customers",
+                                "rowKey": "@triggerOutputs()?['relativePathParameters']?['customerId']"
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "azureTables",
+                                "operationId": "getEntity",
+                                "serviceProviderId": "/serviceProviders/azureTables"
+                            }
+                        }
+                    },
+                    "Response_Success": {
+                        "type": "Response",
+                        "kind": "Http",
+                        "inputs": {
+                            "statusCode": 200,
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "body": "@body('Get_Entity')"
+                        },
+                        "runAfter": {
+                            "Get_Entity": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    }
+                },
+                "runAfter": {}
+            },
+            "Response_Not_Found": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 404
+                },
+                "runAfter": {
+                    "Scope": [
+                        "TIMEDOUT",
+                        "SKIPPED",
+                        "FAILED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "GET",
+                    "relativePath": "/{customerId}"
+                }
+            }
+        }
+    },
+    "kind": "Stateless"
+}
